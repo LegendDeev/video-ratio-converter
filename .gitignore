@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Temp video files (never commit these)
+backend/uploads/*.mp4
+backend/uploads/*.mov
+backend/uploads/*.avi
+backend/uploads/*.mkv
+backend/uploads/*.webm
+backend/uploads/*.m4v
+backend/outputs/*.mp4
+
+# Environment
+backend/.env
+
+# React build
+frontend/build/
+
+# macOS
+.DS_Store
+
+# Logs
+npm-debug.log*

@@ -1,0 +1,533 @@
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 40px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-logo {
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-logo svg { display: block; }
+
+.header-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.header-title span { color: var(--accent); }
+
+.header-badge {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Main ────────────────────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ── Step pill ────────────────────────────────────────────────────────────── */
+.step-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.step-label::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* ── Section heading ─────────────────────────────────────────────────────── */
+.section-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 28px;
+  line-height: 1.2;
+}
+
+/* ── Upload Zone ─────────────────────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 60px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--surface2);
+}
+
+.upload-zone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-glow);
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none;
+}
+
+.upload-zone:hover::after,
+.upload-zone.drag-over::after { opacity: 1; }
+
+.upload-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: var(--surface2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  transition: border-color var(--transition);
+}
+
+.upload-zone:hover .upload-icon { border-color: var(--accent); }
+
+.upload-headline {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.upload-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.upload-sub strong { color: var(--accent); }
+
+/* ── File Info Bar ───────────────────────────────────────────────────────── */
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 28px;
+}
+
+.file-info-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-glow);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--accent-dim);
+}
+
+.file-info-details { flex: 1; min-width: 0; }
+
+.file-info-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-info-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.file-info-meta span + span::before { content: ' · '; }
+
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ── Two-column layout ───────────────────────────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 780px) {
+  .two-col { grid-template-columns: 1fr; }
+  .header { padding: 16px 20px; }
+  .main { padding: 28px 16px 60px; }
+}
+
+/* ── Video Preview ───────────────────────────────────────────────────────── */
+.preview-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.preview-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-card-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.preview-card-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  color: var(--text-muted);
+}
+
+.video-wrapper {
+  padding: 16px;
+  background: #000;
+}
+
+.video-wrapper video {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+/* ── Mode Selector ───────────────────────────────────────────────────────── */
+.convert-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.convert-panel-header {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.convert-panel-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.convert-panel-header p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.convert-panel-body { padding: 20px 22px; }
+
+.mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--surface2);
+  user-select: none;
+}
+
+.mode-option:hover { border-color: var(--text-muted); }
+
+.mode-option.selected {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.mode-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition);
+}
+
+.mode-option.selected .mode-radio {
+  border-color: var(--accent);
+}
+
+.mode-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all var(--transition);
+}
+
+.mode-option.selected .mode-radio-dot { opacity: 1; transform: scale(1); }
+
+.mode-text strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.mode-text span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  line-height: 1.4;
+}
+
+/* ── Convert Button ──────────────────────────────────────────────────────── */
+.btn-convert {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--accent);
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px 24px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-convert:hover:not(:disabled) {
+  background: #d4ff7a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.btn-convert:active:not(:disabled) { transform: translateY(0); }
+
+.btn-convert:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Progress ────────────────────────────────────────────────────────────── */
+.progress-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.progress-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.progress-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ── Error / Alert ───────────────────────────────────────────────────────── */
+.alert {
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 0.85rem;
+  font-family: 'DM Mono', monospace;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.alert-error {
+  background: rgba(255,87,87,0.1);
+  border: 1px solid rgba(255,87,87,0.3);
+  color: var(--danger);
+}
+
+.alert-success {
+  background: rgba(184,255,87,0.1);
+  border: 1px solid rgba(184,255,87,0.3);
+  color: var(--accent);
+}
+
+/* ── Download Button ─────────────────────────────────────────────────────── */
+.btn-download {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 13px 24px;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-top: 14px;
+  text-decoration: none;
+}
+
+.btn-download:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* ── Convert another ─────────────────────────────────────────────────────── */
+.btn-reset {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  padding: 11px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all var(--transition);
+}
+
+.btn-reset:hover { border-color: var(--text-muted); color: var(--text); }
+
+/* ── Spinner ─────────────────────────────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
