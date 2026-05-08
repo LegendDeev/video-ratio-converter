@@ -104,7 +104,7 @@ app.post('/api/upload', upload.single('video'), async (req, res) => {
 app.post('/api/convert', async (req, res) => {
   const { filename, mode = 'blur' } = req.body;
   if (!filename) return res.status(400).json({ error: 'filename is required.' });
-  if (!['blur', 'crop'].includes(mode))
+  if (!['blur', 'black', 'crop'].includes(mode))
     return res.status(400).json({ error: "mode must be 'blur' or 'crop'." });
 
   const inputPath = path.join(UPLOAD_DIR, filename);
