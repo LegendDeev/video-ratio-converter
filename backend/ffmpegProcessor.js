@@ -1,12 +1,9 @@
 /**
- * ffmpegProcessor.js — fixed crop mode for landscape (16:9) sources.
- *
- * BLUR mode: no change — works correctly.
- * CROP mode fix: for landscape videos, scaling width=1080 gives height=607
- *   which is less than 1920 — crop then fails with "Invalid argument".
- *   Fix: scale so the HEIGHT covers 1920px first, then crop width to 1080.
- *   For a 1920×1080 source:
- *     scale to h=1920 → w=3413, then crop w=1080 from centre → 1080×1920 ✓
+ * ffmpegProcessor.js
+ * Three conversion modes:
+ *  blur  – blurred version of video as background
+ *  black – pure black background (video centred, original ratio preserved)
+ *  crop  – centre crop to fill full 9:16 frame
  */
 
 const { spawn } = require('child_process');
@@ -74,13 +71,9 @@ function convertVideo(inputPath, outputPath, mode = 'blur', onProgress) {
     if (mode === 'blur') {
       /**
        * BLUR BACKGROUND MODE
-       * ─────────────────────────────────────────────────────────────────
-       * bg: scale to COVER 1080×1920 (may overflow) → crop exact → blur
-       * fg: scale to FIT inside 1080×1920 (no crop)  → pad to exact size
-       * composite: overlay fg centred on bg
-       *
-       * force_original_aspect_ratio=increase ensures bg always covers canvas.
-       * force_original_aspect_ratio=decrease ensures fg never overflows.
+       * bg: scale to cover 1080×1920 → crop exact → heavy boxblur
+       * fg: scale to fit inside 1080×1920 → pad to exact canvas
+       * composite: overlay fg on bg
        */
       filterComplex =
         `[0:v]scale=${TARGET_W}:${TARGET_H}:force_original_aspect_ratio=increase,` +
@@ -90,20 +83,27 @@ function convertVideo(inputPath, outputPath, mode = 'blur', onProgress) {
         `pad=${TARGET_W}:${TARGET_H}:(ow-iw)/2:(oh-ih)/2:color=black@0[fg];` +
         `[bg][fg]overlay=0:0[out]`;
 
+    } else if (mode === 'black') {
+      /**
+       * BLACK BACKGROUND MODE
+       * Same as blur but background is a solid black canvas instead of
+       * a blurred video. Video is scaled to fit (letterboxed) and centred.
+       *
+       * color=black:size=1080x1920 → generates a solid black 1080×1920 canvas
+       * fg: scale to fit inside 1080×1920 → pad transparent to exact canvas
+       * overlay fg centred on black bg
+       */
+      filterComplex =
+        `color=black:size=${TARGET_W}x${TARGET_H}:rate=30[bg];` +
+        `[0:v]scale=${TARGET_W}:${TARGET_H}:force_original_aspect_ratio=decrease,` +
+        `pad=${TARGET_W}:${TARGET_H}:(ow-iw)/2:(oh-ih)/2:color=black@0[fg];` +
+        `[bg][fg]overlay=0:0[out]`;
+
     } else {
       /**
-       * CENTRE CROP MODE — FIXED for landscape (16:9) sources
-       * ─────────────────────────────────────────────────────────────────
-       * WRONG (old): scale=1080:-2 → for 1920×1080 source gives 1080×607
-       *              crop=1080:1920 then fails — not enough height!
-       *
-       * CORRECT: use force_original_aspect_ratio=increase so the frame
-       *          COVERS the 1080×1920 canvas before cropping.
-       *          For a 1920×1080 source:
-       *            scale to cover 1080×1920 → 3413×1920 (width overflows)
-       *            crop 1080×1920 from centre → ✓
-       *
-       * This is identical to the bg path in blur mode, just without the blur.
+       * CENTRE CROP MODE
+       * Scale to cover 1080×1920 canvas then crop centre.
+       * Works correctly for landscape (16:9) sources.
        */
       filterComplex =
         `[0:v]scale=${TARGET_W}:${TARGET_H}:force_original_aspect_ratio=increase,` +
@@ -129,7 +129,6 @@ function convertVideo(inputPath, outputPath, mode = 'blur', onProgress) {
 
     console.log('[ffmpeg] Mode:', mode);
     console.log('[ffmpeg] Filter:', filterComplex);
-    console.log('[ffmpeg] Output:', outputPath);
 
     const proc = spawn(FFMPEG_BIN, args);
     let stderrBuf = '';
