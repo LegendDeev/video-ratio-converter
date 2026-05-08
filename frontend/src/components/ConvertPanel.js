@@ -2,9 +2,63 @@ import React, { useState, useRef } from 'react';
 import API_BASE from '../api';
 
 const MODES = [
-  { id: 'blur', label: 'Blur Background', desc: 'Full video visible. Blurred version fills the sides. Best for landscape interviews, vlogs.', recommended: true },
-  { id: 'crop', label: 'Centre Crop', desc: 'Crops edges so subject fills the frame. Best when the main action is centred.', recommended: false },
+  {
+    id: 'blur',
+    label: 'Blur Background',
+    desc: 'Full video visible. Blurred version of itself fills the sides.',
+    recommended: true,
+    preview: { top: '#1a1a1a', mid: '#4a4a6a', style: 'blur' },
+  },
+  {
+    id: 'black',
+    label: 'Black Background',
+    desc: 'Full video centred on a clean solid black background. Great for a cinematic look.',
+    recommended: false,
+    preview: { top: '#000000', mid: '#000000', style: 'black' },
+  },
+  {
+    id: 'crop',
+    label: 'Centre Crop',
+    desc: 'Crops edges so subject fills the full vertical frame.',
+    recommended: false,
+    preview: { style: 'crop' },
+  },
 ];
+
+/* Tiny visual preview icon for each mode */
+function ModeIcon({ style }) {
+  const w = 22, h = 36, vw = 14, vh = 9; // video area inside canvas
+  const vx = (w - vw) / 2, vy = (h - vh) / 2;
+
+  if (style === 'blur') return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ flexShrink: 0 }}>
+      <rect width={w} height={h} rx="2" fill="#2a2a4a" />
+      {/* blurred sides hint */}
+      <rect x="0" y={vy} width={vx} height={vh} fill="#3a3a6a" opacity="0.7" />
+      <rect x={vx + vw} y={vy} width={vx} height={vh} fill="#3a3a6a" opacity="0.7" />
+      {/* main video */}
+      <rect x={vx} y={vy} width={vw} height={vh} rx="1" fill="#6060aa" />
+      <rect x={vx + 2} y={vy + 2} width={8} height={5} rx="0.5" fill="#8080cc" opacity="0.6" />
+    </svg>
+  );
+
+  if (style === 'black') return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ flexShrink: 0 }}>
+      <rect width={w} height={h} rx="2" fill="#000" />
+      {/* main video centred */}
+      <rect x={vx} y={vy} width={vw} height={vh} rx="1" fill="#6060aa" />
+      <rect x={vx + 2} y={vy + 2} width={8} height={5} rx="0.5" fill="#8080cc" opacity="0.6" />
+    </svg>
+  );
+
+  // crop — video fills full frame
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ flexShrink: 0 }}>
+      <rect width={w} height={h} rx="2" fill="#6060aa" />
+      <rect x="2" y="4" width={w - 4} height={h - 8} rx="1" fill="#8080cc" opacity="0.5" />
+    </svg>
+  );
+}
 
 export default function ConvertPanel({ fileInfo, onReset }) {
   const [mode, setMode] = useState('blur');
@@ -74,8 +128,8 @@ export default function ConvertPanel({ fileInfo, onReset }) {
   }
 
   const isConverting = status === 'converting';
-  const isDone = status === 'done';
-  const isError = status === 'error';
+  const isDone       = status === 'done';
+  const isError      = status === 'error';
 
   return (
     <div className="convert-panel">
@@ -83,14 +137,25 @@ export default function ConvertPanel({ fileInfo, onReset }) {
         <h3>Conversion Settings</h3>
         <p>Target: 1080 × 1920 · H.264 · CRF 18</p>
       </div>
+
       <div className="convert-panel-body">
+        {/* Mode selector */}
         <div className="mode-options">
           {MODES.map(m => (
-            <div key={m.id} className={`mode-option${mode === m.id ? ' selected' : ''}`}
+            <div
+              key={m.id}
+              className={`mode-option${mode === m.id ? ' selected' : ''}`}
               onClick={() => !isConverting && !isDone && setMode(m.id)}
-              role="radio" aria-checked={mode === m.id} tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && setMode(m.id)}>
+              role="radio"
+              aria-checked={mode === m.id}
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && setMode(m.id)}
+            >
               <div className="mode-radio"><div className="mode-radio-dot" /></div>
+
+              {/* tiny visual preview */}
+              <ModeIcon style={m.preview.style} />
+
               <div className="mode-text">
                 <strong>
                   {m.label}
@@ -106,17 +171,23 @@ export default function ConvertPanel({ fileInfo, onReset }) {
           ))}
         </div>
 
+        {/* Convert button */}
         {!isDone && (
           <button className="btn-convert" onClick={startConversion} disabled={isConverting}>
-            {isConverting ? <><div className="spinner" />Converting…</> : <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              Convert to 9:16 Vertical
-            </>}
+            {isConverting ? (
+              <><div className="spinner" />Converting…</>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                Convert to 9:16 Vertical
+              </>
+            )}
           </button>
         )}
 
+        {/* Progress */}
         {isConverting && (
           <div className="progress-section">
             <div className="progress-header">
@@ -129,6 +200,7 @@ export default function ConvertPanel({ fileInfo, onReset }) {
           </div>
         )}
 
+        {/* Error */}
         {isError && (
           <div className="alert alert-error">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}>
@@ -138,6 +210,7 @@ export default function ConvertPanel({ fileInfo, onReset }) {
           </div>
         )}
 
+        {/* Done */}
         {isDone && (
           <>
             <div className="alert alert-success">
